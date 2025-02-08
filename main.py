@@ -226,6 +226,11 @@ async def reduct_inv(name_item: str, **kwargs):
         conn.close()
 
 # GET endpoints
+@app.get("/")
+async def home():
+    return "HIIIIII"
+
+
 @app.get("/users/{user_id}")
 async def get_user(user_id: int):
     conn = None
