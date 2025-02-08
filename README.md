@@ -4,9 +4,8 @@
 Клонируйте репозиторий с GitHub:
 git clone https://github.com/leksika1/sport-inventory-app.git
 
-<имя_репозитория>
 
-cd sport-inventory-app    
+cd sport-inventory-app # <имя_репозитория>
 
 
 
