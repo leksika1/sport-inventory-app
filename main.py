@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from fastapi import FastAPI, HTTPException, Depends
 import psycopg2
 import os
@@ -24,18 +26,22 @@ app.add_middleware(
 )
 
 def get_db_connection():
+    """Получает соединение с базой данных."""
     try:
+        url = urlparse(os.environ.get("PGPASSWORD=0xswhKnCeYNz4aSOmVYFrpPst0au0gMR psql -h dpg-cujue5jv2p9s73871dog-a.frankfurt-postgres.render.com -U postgress mosh"))
         conn = psycopg2.connect(
-            dbname=os.environ.get("DB_NAME", "MOSH"),
-            user=os.environ.get("DB_USER", "postgres"),
-            password=os.environ.get("DB_PASSWORD", "rootroot1!"),
-            host=os.environ.get("DB_HOST", "localhost"),
-            port=os.environ.get("DB_PORT", "5432")
+            dbname=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port,
+            sslmode='require' if url.hostname != 'localhost' else 'prefer'
         )
         return conn
     except psycopg2.Error as e:
         print(f"Не удалось установить соединение с базой данных: {e}")
         raise HTTPException(status_code=500, detail="Ошибка подключения к базе данных")
+
 
 def execute_query(conn, sql, params=None):
     cursor = None
