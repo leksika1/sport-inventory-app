@@ -28,7 +28,7 @@ app.add_middleware(
 def get_db_connection():
     """Получает соединение с базой данных."""
     try:
-        url = urlparse(os.environ.get("PGPASSWORD=0xswhKnCeYNz4aSOmVYFrpPst0au0gMR psql -h dpg-cujue5jv2p9s73871dog-a.frankfurt-postgres.render.com -U postgress mosh"))
+        url = urlparse(os.environ.get("postgresql://postgress:0xswhKnCeYNz4aSOmVYFrpPst0au0gMR@dpg-cujue5jv2p9s73871dog-a/mosh"))
         conn = psycopg2.connect(
             dbname=url.path[1:],
             user=url.username,
@@ -63,6 +63,42 @@ def execute_query(conn, sql, params=None):
 class UserRegistration(BaseModel):
     login: str
     password: str
+
+@app.get("/create/bd")
+def create_table():
+    """Создает таблицу 'users_' в базе данных."""
+    conn = None  # Инициализируем conn вне блока try
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # SQL-запрос для создания таблицы
+        create_table_query = """
+        CREATE TABLE IF NOT EXISTS users_ (
+            user_id SERIAL PRIMARY KEY,
+            login_ VARCHAR(255) UNIQUE NOT NULL,
+            password_ VARCHAR(255) NOT NULL,
+            item_use_id INT[],
+            access_ TEXT,
+            req_id INT[],
+            req_repair_id INT[]
+        );
+        """
+
+        cur.execute(create_table_query)
+
+        conn.commit()  # Сохраняем изменения в базе данных
+        print("Таблица 'users_' успешно создана.")
+
+    except (psycopg2.Error, ValueError) as e:
+        print(f"Ошибка при создании таблицы: {e}")
+        if conn:
+            conn.rollback()  # Откатываем транзакцию в случае ошибки
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 @app.post("/reg_user")
 async def reg_user(user: UserRegistration):
